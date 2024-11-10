@@ -98,8 +98,12 @@ TUN needs to be enabled before running this installer."
 fi
 
 dir_name=$(grep "# CLIENT_DIR" /etc/wireguard/wg0.conf | awk '{print $3}')
+allowed_ip=$(grep "# ALLOWED_IP" /etc/wireguard/wg0.conf | awk '{print $3}')
 if [ -z "$dir_name" ]; then
 	dir_name=""
+fi
+if [ -z "$allowed_ip" ]; then
+	allowed_ip=""
 fi
 
 create_directory() {
@@ -209,7 +213,7 @@ PrivateKey = $key
 [Peer]
 PublicKey = $(grep PrivateKey /etc/wireguard/wg0.conf | cut -d " " -f 3 | wg pubkey)
 PresharedKey = $psk
-AllowedIPs = $ip/32, $dns/32
+AllowedIPs = $allowed_ip/32, $dns/32
 Endpoint = $(grep '^# ENDPOINT' /etc/wireguard/wg0.conf | cut -d " " -f 3):$(grep ListenPort /etc/wireguard/wg0.conf | cut -d " " -f 3)
 PersistentKeepalive = 25
 
@@ -243,6 +247,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 		done
 		[[ -z "$ip_number" ]] && ip_number="1"
 		ip=$(ip -4 addr | grep inet | grep -vE '127(\.[0-9]{1,3}){3}' | cut -d '/' -f 1 | grep -oE '[0-9]{1,3}(\.[0-9]{1,3}){3}' | sed -n "$ip_number"p)
+		allowed_ip= ip
 	fi
 
 	# If $ip is a private IP address, the server must be behind NAT
