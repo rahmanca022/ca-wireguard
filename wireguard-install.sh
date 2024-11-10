@@ -142,12 +142,6 @@ new_client_dns () {
 }
 
 new_client_setup () {
-	CLIENT_DIR=~/wg-clients
-	if [ ! -d "$CLIENT_DIR" ]; then
-			mkdir -p "$CLIENT_DIR"
-			echo "Direktori $CLIENT_DIR dibuat."
-	fi
-
 	# Given a list of the assigned internal IPv4 addresses, obtain the lowest still
 	# available octet. Important to start looking at 2, because 1 is our gateway.
 	octet=2
@@ -263,6 +257,13 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 	client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' <<< "$unsanitized_client" | cut -c-15)
 	[[ -z "$client" ]] && client="client"
 	echo
+
+	CLIENT_DIR=/opt/wg-clients
+	if [ ! -d "$CLIENT_DIR" ]; then
+		mkdir -p "$CLIENT_DIR"
+		echo "$CLIENT_DIR was created successfully."
+	fi
+	
 	new_client_dns
 	# Set up automatic updates for BoringTun if the user is fine with that
 	if [[ "$use_boringtun" -eq 1 ]]; then
@@ -510,7 +511,7 @@ else
 			qrencode -t ANSI256UTF8 < ~/"$client.conf"
 			echo -e '\xE2\x86\x91 That is a QR code containing your client configuration.'
 			echo
-			echo "$client added. Configuration available in:" ~/"$client.conf"
+			echo "$client added. Configuration available in:" ~/"$CLIENT_DIR/$client.conf"
 			exit
 		;;
 		2)
