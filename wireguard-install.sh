@@ -529,7 +529,7 @@ else
 				client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' <<< "$unsanitized_client" | cut -c-15)
 			done
 			echo
-			create_directory
+			
 			new_client_dns
 			new_client_setup
 			# Append new client configuration to the WireGuard interface
