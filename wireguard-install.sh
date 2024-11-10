@@ -97,6 +97,31 @@ TUN needs to be enabled before running this installer."
 	fi
 fi
 
+dir_name=""
+create_directory() {
+    # Prompt for the directory name
+    read -p "Enter the directory name to create (e.g., /opt/mydir): " dir_name
+
+    # Check if the script is running as root
+    if [ "$(id -u)" -ne 0 ]; then
+        echo "This script requires root permissions. Please enter your password."
+        
+        # Use sudo to run the script again with root permissions
+        exec sudo "$0" "$@"
+    fi
+
+    # Attempt to create the directory
+    mkdir -p "$dir_name"
+
+    # Check if the directory was created successfully
+    if [ $? -eq 0 ]; then
+        echo "Directory '$dir_name' created successfully."
+    else
+        echo "Failed to create directory '$dir_name'. Setting dir_name to root directory '/'."
+        dir_name="/"  # Set default to root directory
+    fi
+}
+
 new_client_dns () {
 	echo "Select a DNS server for the client:"
 	echo "   1) Current system resolvers"
@@ -165,7 +190,7 @@ AllowedIPs = 10.7.0.$octet/32$(grep -q 'fddd:2c4:2c4:2c4::1' /etc/wireguard/wg0.
 # END_PEER $client
 EOF
 	# Create client configuration
-	cat << EOF > "$CLIENT_DIR/$client.conf"
+	cat << EOF > "$dir_name/$client.conf"
 [Interface]
 Address = 10.7.0.$octet/24$(grep -q 'fddd:2c4:2c4:2c4::1' /etc/wireguard/wg0.conf && echo ", fddd:2c4:2c4:2c4::$octet/64")
 DNS = $dns
@@ -258,12 +283,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 	[[ -z "$client" ]] && client="client"
 	echo
 
-	CLIENT_DIR=/opt/wg-clients
-	if [ ! -d "$CLIENT_DIR" ]; then
-			mkdir -p "$CLIENT_DIR"
-			echo "$CLIENT_DIR was created successfully"
-	fi
-
+	create_directory
 	new_client_dns
 	# Set up automatic updates for BoringTun if the user is fine with that
 	if [[ "$use_boringtun" -eq 1 ]]; then
@@ -469,12 +489,12 @@ EOF
 		{ crontab -l 2>/dev/null; echo "$(( $RANDOM % 60 )) $(( $RANDOM % 3 + 3 )) * * * /usr/local/sbin/boringtun-upgrade &>/dev/null" ; } | crontab -
 	fi
 	echo
-	qrencode -t ANSI256UTF8 < ~/"$CLIENT_DIR/$client.conf"
+	qrencode -t ANSI256UTF8 < ~/"$dir_name/$client.conf"
 	echo -e '\xE2\x86\x91 That is a QR code containing the client configuration.'
 	echo
 	echo "Finished!"
 	echo
-	echo "The client configuration is available in:" ~/"$CLIENT_DIR/$client.conf"
+	echo "The client configuration is available in:" ~/"$dir_name/$client.conf"
 	echo "New clients can be added by running this script again."
 else
 	clear
@@ -508,10 +528,10 @@ else
 			# Append new client configuration to the WireGuard interface
 			wg addconf wg0 <(sed -n "/^# BEGIN_PEER $client/,/^# END_PEER $client/p" /etc/wireguard/wg0.conf)
 			echo
-			qrencode -t ANSI256UTF8 < ~/"$CLIENT_DIR/$client.conf"
+			qrencode -t ANSI256UTF8 < ~/"$dir_name/$client.conf"
 			echo -e '\xE2\x86\x91 That is a QR code containing your client configuration.'
 			echo
-			echo "$client added. Configuration available in:" ~/"$CLIENT_DIR/$client.conf"
+			echo "$client added. Configuration available in:" ~/"$dir_name/$client.conf"
 			exit
 		;;
 		2)
