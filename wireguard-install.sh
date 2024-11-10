@@ -99,8 +99,14 @@ fi
 
 dir_name=""
 create_directory() {
+		default_dir="/opt/wg-clients"
     # Prompt for the directory name
-    read -p "Enter the directory name to create (e.g., /opt/mydir): " dir_name
+    read -p "Enter the directory name to create [default: /opt/wg-clients]: " dir_name
+
+		# Set default value if input is empty
+    if [ -z "$dir_name" ]; then
+			dir_name="/opt/wg-clients"  # Set default directory
+    fi
 
     # Check if the script is running as root
     if [ "$(id -u)" -ne 0 ]; then
@@ -118,7 +124,7 @@ create_directory() {
         echo "Directory '$dir_name' created successfully."
     else
         echo "Failed to create directory '$dir_name'. Setting dir_name to root directory '/'."
-        dir_name="/"  # Set default to root directory
+        dir_name="/opt/wg-clients"  # Set default to root directory
     fi
 }
 
