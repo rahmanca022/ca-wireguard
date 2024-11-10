@@ -97,7 +97,11 @@ TUN needs to be enabled before running this installer."
 	fi
 fi
 
-dir_name=""
+dir_name=$(grep "# WORKDIR" /etc/wireguard/wg0.conf | awk '{print $3}')
+if [ -z "$dir_name" ]; then
+	dir_name=""
+fi
+
 create_directory() {
 		default_dir="/opt/wg-clients"
     # Prompt for the directory name
@@ -126,6 +130,8 @@ create_directory() {
         echo "Failed to create directory '$dir_name'. Setting dir_name to root directory '/'."
         dir_name="/opt/wg-clients"  # Set default to root directory
     fi
+
+		echo "# WORKDIR $dir_name" >> /etc/wireguard/wg0.conf
 }
 
 new_client_dns () {
@@ -529,7 +535,7 @@ else
 				client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' <<< "$unsanitized_client" | cut -c-15)
 			done
 			echo
-			
+
 			new_client_dns
 			new_client_setup
 			# Append new client configuration to the WireGuard interface
