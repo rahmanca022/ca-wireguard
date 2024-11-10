@@ -489,12 +489,12 @@ EOF
 		{ crontab -l 2>/dev/null; echo "$(( $RANDOM % 60 )) $(( $RANDOM % 3 + 3 )) * * * /usr/local/sbin/boringtun-upgrade &>/dev/null" ; } | crontab -
 	fi
 	echo
-	qrencode -t ANSI256UTF8 < ~/"$dir_name/$client.conf"
+	qrencode -t ANSI256UTF8 < "$dir_name/$client.conf"
 	echo -e '\xE2\x86\x91 That is a QR code containing the client configuration.'
 	echo
 	echo "Finished!"
 	echo
-	echo "The client configuration is available in:" ~/"$dir_name/$client.conf"
+	echo "The client configuration is available in:" "$dir_name/$client.conf"
 	echo "New clients can be added by running this script again."
 else
 	clear
@@ -527,12 +527,12 @@ else
 			new_client_dns
 			new_client_setup
 			# Append new client configuration to the WireGuard interface
-			wg addconf wg0 <(sed -n "/^# BEGIN_PEER $client/,/^# END_PEER $client/p" /etc/wireguard/wg0.conf)
+			wg addconf wg0 <(sed -n "/^# BEGIN_PEER $dir_name/$client/,/^# END_PEER $dir_name/$client/p" /etc/wireguard/wg0.conf)
 			echo
-			qrencode -t ANSI256UTF8 < ~/"$dir_name/$client.conf"
+			qrencode -t ANSI256UTF8 < "$dir_name/$client.conf"
 			echo -e '\xE2\x86\x91 That is a QR code containing your client configuration.'
 			echo
-			echo "$client added. Configuration available in:" ~/"$dir_name/$client.conf"
+			echo "$client added. Configuration available in:" "$dir_name/$client.conf"
 			exit
 		;;
 		2)
