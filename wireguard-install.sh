@@ -142,6 +142,12 @@ new_client_dns () {
 }
 
 new_client_setup () {
+	CLIENT_DIR=~/wg-clients
+	if [ ! -d "$CLIENT_DIR" ]; then
+			mkdir -p "$CLIENT_DIR"
+			echo "Direktori $CLIENT_DIR dibuat."
+	fi
+
 	# Given a list of the assigned internal IPv4 addresses, obtain the lowest still
 	# available octet. Important to start looking at 2, because 1 is our gateway.
 	octet=2
@@ -165,7 +171,7 @@ AllowedIPs = 10.7.0.$octet/32$(grep -q 'fddd:2c4:2c4:2c4::1' /etc/wireguard/wg0.
 # END_PEER $client
 EOF
 	# Create client configuration
-	cat << EOF > ~/"$client".conf
+	cat << EOF > "$CLIENT_DIR/$client.conf"
 [Interface]
 Address = 10.7.0.$octet/24$(grep -q 'fddd:2c4:2c4:2c4::1' /etc/wireguard/wg0.conf && echo ", fddd:2c4:2c4:2c4::$octet/64")
 DNS = $dns
