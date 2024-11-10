@@ -97,7 +97,7 @@ TUN needs to be enabled before running this installer."
 	fi
 fi
 
-dir_name=$(grep "# WORKDIR" /etc/wireguard/wg0.conf | awk '{print $3}')
+dir_name=$(grep "# CLIENT_DIR" /etc/wireguard/wg0.conf | awk '{print $3}')
 if [ -z "$dir_name" ]; then
 	dir_name=""
 fi
@@ -130,8 +130,6 @@ create_directory() {
         echo "Failed to create directory '$dir_name'. Setting dir_name to root directory '/'."
         dir_name="/opt/wg-clients"  # Set default to root directory
     fi
-
-		echo "# WORKDIR $dir_name" >> /etc/wireguard/wg0.conf
 }
 
 new_client_dns () {
@@ -393,6 +391,7 @@ Environment=WG_SUDO=1" > /etc/systemd/system/wg-quick@wg0.service.d/boringtun.co
 # Do not alter the commented lines
 # They are used by wireguard-install
 # ENDPOINT $([[ -n "$public_ip" ]] && echo "$public_ip" || echo "$ip")
+# CLIENT_DIR $dir_name
 
 [Interface]
 Address = 10.7.0.1/24$([[ -n "$ip6" ]] && echo ", fddd:2c4:2c4:2c4::1/64")
