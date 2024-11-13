@@ -247,7 +247,7 @@ if [[ ! -e /etc/wireguard/wg0.conf ]]; then
 		done
 		[[ -z "$ip_number" ]] && ip_number="1"
 		ip=$(ip -4 addr | grep inet | grep -vE '127(\.[0-9]{1,3}){3}' | cut -d '/' -f 1 | grep -oE '[0-9]{1,3}(\.[0-9]{1,3}){3}' | sed -n "$ip_number"p)
-		allowed_ip= ip
+		allowed_ip=$ip
 	fi
 
 	# If $ip is a private IP address, the server must be behind NAT
@@ -397,6 +397,7 @@ Environment=WG_SUDO=1" > /etc/systemd/system/wg-quick@wg0.service.d/boringtun.co
 # They are used by wireguard-install
 # ENDPOINT $([[ -n "$public_ip" ]] && echo "$public_ip" || echo "$ip")
 # CLIENT_DIR $dir_name
+# ALLOWED_IP $allowed_ip
 
 [Interface]
 Address = 10.7.0.1/24$([[ -n "$ip6" ]] && echo ", fddd:2c4:2c4:2c4::1/64")
